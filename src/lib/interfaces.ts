@@ -10,7 +10,7 @@ export interface Questions {
   next: NextQuestion[];
 }
 
-interface Answers {
+export interface Answers {
   id: string;
   label: string;
   score: string;
