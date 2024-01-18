@@ -27,6 +27,7 @@ const StyledButton = styled.button`
   &:disabled {
     background-color: #eceff1;
     color: #7b99a9;
+    pointer-events: none;
 
     &:after {
       position: relative;

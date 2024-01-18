@@ -1,70 +1,40 @@
-# Getting Started with Create React App
+# Heartburn Checker 🩺
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Multi step questionnaire to assess heartburn and provide an outcome based on the patient's answers.
 
-## Available Scripts
+## How to run locally
 
-In the project directory, you can run:
+First, run `npm install` to install the dependencies needed.
 
-### `npm start`
+To start the development server run:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+npm start
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### `npm test`
+## Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Typescript
+- React
+- Styled Components
+- Axios
 
-### `npm run build`
+## Project Structure
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+`App.tsx`: Parent component, data is fecthed, set in a state and sent in as a prop to the `PatientQuestionnaire.tsx` component
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+`/api`: data request using axios to mimic an API request.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+`/components`:
 
-### `npm run eject`
+`PatientQuestionnaire.tsx`: Renders the questionnaire questions, answers and encapsulates the logic for the user to advance in the questionnaire once it selects an answer or move backwards, also renders the `ProgressBar.tsx` and `OutcomeComponent.tsx` components.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+`ProgressBar.tsx`: reusable progress bar component that accepts a value as prop and fills incrementally giving a visualisation how far the user is along the questionnaire.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+`OutcomeComponent.tsx`: Renders the outcome
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Styling
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Styling was done with `styled components` (CSS-in-JS) following mock-ups provided. My approach was to keep most of the styled components within the component they're being used except the button which is being used in couple components - in the future I would like to extract and make them more reusable so they can be used globally.
