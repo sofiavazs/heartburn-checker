@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 const StyledButton = styled.button`
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -8,6 +9,7 @@ const StyledButton = styled.button`
   background-color: #75d0be;
   border: none;
   border-radius: 4px;
+  font-family: "Montserrat", sans-serif;
   font-size: 1rem;
   font-weight: 600;
   color: #fff;

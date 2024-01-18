@@ -15,9 +15,6 @@ const OutcomeComponent: React.FC<Props> = ({ outcome }) => {
         {outcome.show_booking_button && (
           <StyledButton>Book an appointment</StyledButton>
         )}
-        <div className="footer-container">
-          <a href="/">Back to the start screen</a>
-        </div>
       </div>
     </>
   );

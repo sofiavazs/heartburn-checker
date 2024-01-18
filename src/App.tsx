@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 
 import { Questionnaire } from "./lib/interfaces";
-import { getFormData } from "../src/api/getFormData";
+import { getQuestionnaireData } from "./api/getQuestionnaireData";
 import PatientQuestionnaire from "./components/PatientQuestionnaire";
 
 const App = () => {
   const [formData, setFormData] = useState<Questionnaire>();
 
   useEffect(() => {
-    getFormData()
+    getQuestionnaireData()
       .then((response) => setFormData(response))
       .catch((error) => console.log(error));
   }, []);

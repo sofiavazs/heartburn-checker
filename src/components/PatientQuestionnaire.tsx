@@ -87,11 +87,18 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
           <h1>Heartburn Checker</h1>
         </CardHeader>
         <ProgressBar value={progress} />
-        <CardBody>
-          {outcome ? (
-            <OutcomeComponent outcome={outcome} />
-          ) : (
-            <>
+        {outcome ? (
+          <>
+            <CardBody>
+              <OutcomeComponent outcome={outcome} />
+            </CardBody>
+            <CardFooter>
+              <a href="/">Back to the start screen</a>
+            </CardFooter>
+          </>
+        ) : (
+          <>
+            <CardBody>
               <h2>{question?.question_text}</h2>
               <span className="underline" />
               <div>
@@ -105,15 +112,15 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
                     </button>
                   ))}
                 </div>
-                <div className="footer-container">
-                  <StyledButton disabled={!answer} onClick={nextQuestion}>
-                    Next
-                  </StyledButton>
-                </div>
               </div>
-            </>
-          )}
-        </CardBody>
+            </CardBody>
+            <CardFooter>
+              <StyledButton disabled={!answer} onClick={nextQuestion}>
+                Next
+              </StyledButton>
+            </CardFooter>
+          </>
+        )}
       </StyledCard>
     </PageWrapper>
   );
@@ -132,7 +139,7 @@ const PageWrapper = styled.div`
 const StyledCard = styled.div`
   display: flex;
   max-width: 25rem;
-  height: auto;
+  height: 80vh;
   margin: 1rem;
   flex-direction: column;
   background: #fff;
@@ -169,6 +176,7 @@ const CardHeader = styled.div`
 
 const CardBody = styled.div`
   display: flex;
+  flex: 1;
   flex-direction: column;
   padding: 2rem;
 
@@ -231,15 +239,16 @@ const CardBody = styled.div`
         }
       }
     }
+  }
+`;
 
-    .footer-container {
-      display: flex;
-      margin-top: 24vh;
-      text-align: center;
+const CardFooter = styled.div`
+  display: flex;
+  padding: 2rem;
+  justify-content: center;
+  padding: 2rem;
 
-      a {
-        color: #75d0be;
-      }
-    }
+  a {
+    color: #75d0be;
   }
 `;
