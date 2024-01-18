@@ -1,21 +1,23 @@
 import React, { useState } from "react";
+import styled from "styled-components";
 
 import { Outcomes, Questionnaire } from "./lib/interfaces";
-import styled from "styled-components";
+import ProgressBar from "./components/ProgressBar";
 
 interface Props {
   formData: Questionnaire;
 }
 
 const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
+  const totalNumberQuestions = formData && formData.questions.length + 1;
+  const progressIncrement = 100 / totalNumberQuestions;
   const [questionId, setQuestionId] = useState<string>(
     formData.questions[0].id
   );
   const [patientScore, setPatientScore] = useState<number>(0);
   const [patientAnswers, setPatientAnswers] = useState<any>([]);
   const [outcome, setOutcome] = useState<Outcomes>();
-
-  console.log(formData);
+  const [progress, setProgress] = useState<number>(progressIncrement);
 
   const question = formData?.questions.find(
     (question) => question.id === questionId
@@ -56,6 +58,7 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
       );
       setOutcome(patientOutcome);
     }
+    setProgress(progress + progressIncrement);
   };
 
   const previousQuestion = () => {
@@ -67,55 +70,57 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
         formData.questions[currentQuestionIndex - 1].id;
       setQuestionId(previousQuestionId);
     }
+    setProgress(progress - progressIncrement);
   };
-
-  console.log(patientAnswers);
 
   return (
     <PageWrapper>
-      {outcome ? (
-        <>
-          <StyledCard>
-            <CardHeader>
-              <h1>Heartburn Checker</h1>
-            </CardHeader>
-          </StyledCard>
-          <h2>Thank you for answering all the questions</h2>
-          <h3>{outcome.text}</h3>
-          {outcome.show_booking_button && <button>Book an appointment</button>}
-        </>
-      ) : (
-        <StyledCard>
-          <CardHeader>
-            {patientScore > 0 && (
-              <button className="previous" onClick={previousQuestion} />
-            )}
-            <h1>Heartburn Checker</h1>
-          </CardHeader>
-          <CardBody>
-            <h2>Question</h2>
-            <h3>{question?.question_text}</h3>
-            <div>
-              <div className="answer-buttons-container">
-                {question?.answers.map((answer) => (
-                  <button key={answer.id} onClick={() => selectAnswer(answer)}>
-                    {answer.label}
+      <StyledCard>
+        <CardHeader>
+          {patientScore > 0 && !outcome && (
+            <button className="previous" onClick={previousQuestion} />
+          )}
+          <h1>Heartburn Checker</h1>
+        </CardHeader>
+        <ProgressBar value={progress} />
+        <CardBody>
+          {outcome ? (
+            <>
+              <h2>Thank you for answering all the questions</h2>
+              <h3>{outcome?.text}</h3>
+              {outcome.show_booking_button && (
+                <button>Book an appointment</button>
+              )}
+            </>
+          ) : (
+            <>
+              <h2>Question</h2>
+              <h3>{question?.question_text}</h3>
+              <div>
+                <div className="answer-buttons-container">
+                  {question?.answers.map((answer) => (
+                    <button
+                      key={answer.id}
+                      onClick={() => selectAnswer(answer)}
+                    >
+                      {answer.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="next-button-container">
+                  <button
+                    className="next"
+                    disabled={!answer}
+                    onClick={nextQuestion}
+                  >
+                    Next
                   </button>
-                ))}
+                </div>
               </div>
-              <div className="next-button-container">
-                <button
-                  className="next"
-                  disabled={!answer}
-                  onClick={nextQuestion}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </CardBody>
-        </StyledCard>
-      )}
+            </>
+          )}
+        </CardBody>
+      </StyledCard>
     </PageWrapper>
   );
 };
@@ -132,11 +137,10 @@ const PageWrapper = styled.div`
 
 const StyledCard = styled.div`
   display: flex;
-  width: 30vw;
+  max-width: 25rem;
   height: auto;
   margin: 1rem;
   flex-direction: column;
-  align-items: center;
   background: #fff;
   border-radius: 1rem;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -161,7 +165,6 @@ const CardHeader = styled.div`
   align-items: center;
   justify-content: center;
   color: #3f6072;
-  border-bottom: 1px solid #e3e1e1;
 
   h1 {
     font-size: 1rem;
