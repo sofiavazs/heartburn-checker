@@ -1,9 +1,9 @@
 export interface Questionnaire {
-  questions: Questions[];
-  outcomes: Outcomes[];
+  questions: Question[];
+  outcomes: Outcome[];
 }
 
-export interface Questions {
+export interface Question {
   id: string;
   question_text: string;
   answers: Answers[];
@@ -23,7 +23,7 @@ interface NextQuestion {
   outcome?: string;
 }
 
-export interface Outcomes {
+export interface Outcome {
   id: string;
   text: string;
   show_booking_button: boolean;

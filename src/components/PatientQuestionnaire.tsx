@@ -1,22 +1,24 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 
-import { Outcomes, Questionnaire } from "./lib/interfaces";
-import ProgressBar from "./components/ProgressBar";
+import { Outcome, Questionnaire } from "../lib/interfaces";
+import ProgressBar from "./ProgressBar";
+import OutcomeComponent from "./OutcomeComponent";
+import StyledButton from "../styles/StyledButton";
 
 interface Props {
   formData: Questionnaire;
 }
 
 const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
-  const totalNumberQuestions = formData && formData.questions.length + 1;
+  const totalNumberQuestions = formData && formData.questions.length;
   const progressIncrement = 100 / totalNumberQuestions;
   const [questionId, setQuestionId] = useState<string>(
     formData.questions[0].id
   );
   const [patientScore, setPatientScore] = useState<number>(0);
   const [patientAnswers, setPatientAnswers] = useState<any>([]);
-  const [outcome, setOutcome] = useState<Outcomes>();
+  const [outcome, setOutcome] = useState<Outcome>();
   const [progress, setProgress] = useState<number>(progressIncrement);
 
   const question = formData?.questions.find(
@@ -58,7 +60,9 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
       );
       setOutcome(patientOutcome);
     }
-    setProgress(progress + progressIncrement);
+    if (progress <= 100) {
+      setProgress(progress + progressIncrement);
+    }
   };
 
   const previousQuestion = () => {
@@ -85,17 +89,11 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
         <ProgressBar value={progress} />
         <CardBody>
           {outcome ? (
-            <>
-              <h2>Thank you for answering all the questions</h2>
-              <h3>{outcome?.text}</h3>
-              {outcome.show_booking_button && (
-                <button>Book an appointment</button>
-              )}
-            </>
+            <OutcomeComponent outcome={outcome} />
           ) : (
             <>
-              <h2>Question</h2>
-              <h3>{question?.question_text}</h3>
+              <h2>{question?.question_text}</h2>
+              <span className="underline" />
               <div>
                 <div className="answer-buttons-container">
                   {question?.answers.map((answer) => (
@@ -107,14 +105,10 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
                     </button>
                   ))}
                 </div>
-                <div className="next-button-container">
-                  <button
-                    className="next"
-                    disabled={!answer}
-                    onClick={nextQuestion}
-                  >
+                <div className="footer-container">
+                  <StyledButton disabled={!answer} onClick={nextQuestion}>
                     Next
-                  </button>
+                  </StyledButton>
                 </div>
               </div>
             </>
@@ -168,6 +162,7 @@ const CardHeader = styled.div`
 
   h1 {
     font-size: 1rem;
+    font-weight: 600;
     padding: 1rem;
   }
 `;
@@ -177,11 +172,23 @@ const CardBody = styled.div`
   flex-direction: column;
   padding: 2rem;
 
-  h2,
-  h3 {
+  h2 {
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 900;
     color: #3f6072;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #3f6072;
+  }
+
+  .underline {
+    width: 2.5rem;
+    height: 3px;
+    background-color: #e3e1e1;
+    margin-bottom: 1rem;
   }
 
   div {
@@ -199,7 +206,8 @@ const CardBody = styled.div`
         background-color: transparent;
         border: 2px solid #e3e1e1;
         border-radius: 40px;
-        font-size: 16px;
+        font-family: "Montserrat", sans-serif;
+        font-size: 1rem;
         font-weight: 600;
         color: #75d0be;
         cursor: pointer;
@@ -224,42 +232,13 @@ const CardBody = styled.div`
       }
     }
 
-    .next-button-container {
+    .footer-container {
       display: flex;
       margin-top: 24vh;
+      text-align: center;
 
-      button.next {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 16px;
-        background-color: #75d0be;
-        border: none;
-        border-radius: 4px;
-        font-size: 16px;
-        font-weight: 600;
-        color: #fff;
-        cursor: pointer;
-
-        &:after {
-          content: "";
-          position: relative;
-          right: -40%;
-          background: url("./assets/icon-chevron-right.svg") no-repeat;
-          width: 24px;
-          height: 24px;
-        }
-
-        &:disabled {
-          background-color: #eceff1;
-          color: #7b99a9;
-
-          &:after {
-            background: url("./assets/icon-chevron-right-grey.svg") no-repeat;
-            width: 24px;
-            height: 24px;
-          }
-        }
+      a {
+        color: #75d0be;
       }
     }
   }
