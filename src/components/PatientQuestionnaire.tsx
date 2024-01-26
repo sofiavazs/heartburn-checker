@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 
-import { Outcome, Questionnaire } from "../lib/interfaces";
+import { Answers, Outcome, Questionnaire } from "../lib/interfaces";
 import ProgressBar from "./ProgressBar";
 import OutcomeComponent from "./OutcomeComponent";
 import StyledButton from "../styles/StyledButton";
@@ -17,35 +17,69 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
     formData.questions[0].id
   );
   const [patientScore, setPatientScore] = useState<number>(0);
-  const [patientAnswers, setPatientAnswers] = useState<any>([]);
+  const [patientAnswers, setPatientAnswers] = useState<{
+    [key: string]: string;
+  }>({});
   const [outcome, setOutcome] = useState<Outcome>();
   const [progress, setProgress] = useState<number>(progressIncrement);
+  const [answerSelected, setAnswerSelected] = useState<string>("");
 
+  /* Stores the question when there's a match with the questionId state
+    which is initialised with the first question
+    */
   const question = formData?.questions.find(
     (question) => question.id === questionId
   );
+
+  const currentQuestionIndex = formData.questions.findIndex(
+    (current) => current.id === questionId
+  );
+
+  /* Stores when there's a match between the answer id
+     and the item from the patientAnswers state accessed with the questionId
+     */
   const answer =
     patientAnswers &&
     question?.answers.find(
       (answer) => answer.id === patientAnswers[questionId]
     );
 
+  /*
+  Allows to add new answers to the patient answers state
+  Everytime it's invoked on the answer buttons the answer object is sent in
+  and the patientAnswers state is updated, by keep adding new items with the questionId as a key and the answer.id as the value
+  */
   const selectAnswer = (answer: any) => {
     setPatientAnswers((prev: any) => ({
       ...prev,
       [questionId]: answer.id,
     }));
+    setAnswerSelected(answer?.id);
   };
 
   const nextQuestion = () => {
-    const currentScore = patientScore + answer.score;
+    const currentScore = patientScore + answer!.score;
     setPatientScore(currentScore);
 
+    // gets the next question
     const nextOptions = question?.next;
+
+    /*
+    Finds the next question, there's two instances where the next array in the question object
+    is different: the first question which has the property "answered" and the last question where
+    we have the "max_score" and/or "outcome"
+
+    First question: when there's a match from the "answered" with the answer.id the object is returned,
+    that then is used on the next if statement block to set the questionId and get the next question.
+
+    Last question: when there's the property "max_score", then if the current score is less than or equal to the
+    "max_score" we return that item, that then is used on the next block to update the outcome state.
+    */
+
     const nextOption = nextOptions?.find((option: any) => {
       if (option.answered) {
-        return option.answered === answer.id;
-      } else if (typeof option.max_score === "number") {
+        return option.answered === answer?.id;
+      } else if (option.max_score) {
         return currentScore <= option.max_score;
       } else {
         return true;
@@ -66,14 +100,19 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
   };
 
   const previousQuestion = () => {
-    const currentQuestionIndex = formData.questions.findIndex(
-      (current) => current.id === questionId
+    const previousQuestionId = formData.questions[currentQuestionIndex - 1].id;
+    const previousAnswer = patientAnswers[previousQuestionId];
+    const answers = formData.questions.flatMap((answer) => answer.answers);
+    const previousAnswerMatch = answers.find(
+      (answer) => answer.id === previousAnswer
     );
-    if (currentQuestionIndex > 0) {
-      const previousQuestionId =
-        formData.questions[currentQuestionIndex - 1].id;
-      setQuestionId(previousQuestionId);
+    const currentAnswerScore = previousAnswerMatch?.score!;
+
+    if (previousAnswerMatch) {
+      setAnswerSelected(previousAnswerMatch.id);
     }
+    setQuestionId(previousQuestionId);
+    setPatientScore(patientScore - currentAnswerScore);
     setProgress(progress - progressIncrement);
   };
 
@@ -81,7 +120,7 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
     <PageWrapper>
       <StyledCard>
         <CardHeader>
-          {patientScore > 0 && !outcome && (
+          {currentQuestionIndex > 0 && !outcome && (
             <button className="previous" onClick={previousQuestion} />
           )}
           <h1>Heartburn Checker</h1>
@@ -103,14 +142,18 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
               <span className="underline" />
               <div>
                 <div className="answer-buttons-container">
-                  {question?.answers.map((answer) => (
-                    <button
-                      key={answer.id}
-                      onClick={() => selectAnswer(answer)}
-                    >
-                      {answer.label}
-                    </button>
-                  ))}
+                  {question?.answers.map((answer) => {
+                    const isAnswerSelected = answerSelected === answer.id;
+                    return (
+                      <button
+                        className={isAnswerSelected ? "selected" : ""}
+                        key={answer.id}
+                        onClick={() => selectAnswer(answer)}
+                      >
+                        {answer.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </CardBody>
@@ -220,7 +263,7 @@ const CardBody = styled.div`
         color: #75d0be;
         cursor: pointer;
 
-        &:focus {
+        &.selected {
           display: flex;
           justify-content: center;
           align-items: center;
