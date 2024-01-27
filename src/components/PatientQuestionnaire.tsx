@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 
-import { Answers, Outcome, Questionnaire } from "../lib/interfaces";
+import { Outcome, Questionnaire } from "../lib/interfaces";
 import ProgressBar from "./ProgressBar";
 import OutcomeComponent from "./OutcomeComponent";
 import StyledButton from "../styles/StyledButton";
@@ -11,33 +11,50 @@ interface Props {
 }
 
 const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
-  const totalNumberQuestions = formData && formData.questions.length;
-  const progressIncrement = 100 / totalNumberQuestions;
+  const [patientScore, setPatientScore] = useState<number>(0);
   const [questionId, setQuestionId] = useState<string>(
     formData.questions[0].id
   );
-  const [patientScore, setPatientScore] = useState<number>(0);
+  const currentQuestionIndex = formData.questions.findIndex(
+    (current) => current.id === questionId
+  );
   const [patientAnswers, setPatientAnswers] = useState<{
     [key: string]: string;
   }>({});
   const [outcome, setOutcome] = useState<Outcome>();
-  const [progress, setProgress] = useState<number>(progressIncrement);
   const [answerSelected, setAnswerSelected] = useState<string>("");
 
-  /* Stores the question when there's a match with the questionId state
+  /*
+    Progress bar value logic:
+    If the patient answers yes to the first question there's an extra question
+    that they will answer which gets skipped if the patient answers no. Since
+    the length will vary based on that, then the totalNumberQuestions will need to reflect that,
+    so a ternary operator performs that check and returns the length accordingly.
+
+    The reason why is length + 1 in the first condition is because I want the progress bar
+    to be completed only when the outcome screen is shown.
+    However, this is not a scalable solution, as it only applies to this specific .json, ideally
+    for example, each question could have an associated progress property to cover further branching.
+  */
+  const totalNumberQuestions =
+    currentQuestionIndex >= 1 && patientScore >= 5
+      ? formData.questions.length + 1
+      : formData.questions.length;
+  const progressIncrement = 100 / totalNumberQuestions;
+  const [progress, setProgress] = useState<number>(progressIncrement);
+
+  /*
+    Stores the question when there's a match with the questionId state
     which is initialised with the first question
-    */
+  */
   const question = formData?.questions.find(
     (question) => question.id === questionId
   );
 
-  const currentQuestionIndex = formData.questions.findIndex(
-    (current) => current.id === questionId
-  );
-
-  /* Stores when there's a match between the answer id
-     and the item from the patientAnswers state accessed with the questionId
-     */
+  /*
+    Stores when there's a match between the answer id
+    and the item from the patientAnswers state accessed with the questionId
+  */
   const answer =
     patientAnswers &&
     question?.answers.find(
@@ -45,9 +62,10 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
     );
 
   /*
-  Allows to add new answers to the patient answers state
-  Everytime it's invoked on the answer buttons the answer object is sent in
-  and the patientAnswers state is updated, by keep adding new items with the questionId as a key and the answer.id as the value
+    Allows to add new answers to the patient answers state
+    Everytime it's invoked on the answer buttons the answer object is sent in
+    and the patientAnswers state is updated by keep adding new items with
+    the questionId as a key and the answer.id as the value.
   */
   const selectAnswer = (answer: any) => {
     setPatientAnswers((prev: any) => ({
@@ -65,15 +83,15 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
     const nextOptions = question?.next;
 
     /*
-    Finds the next question, there's two instances where the next array in the question object
-    is different: the first question which has the property "answered" and the last question where
-    we have the "max_score" and/or "outcome"
+      Finds the next question, there's two instances where the next array in the question object
+      is different: the first question which has the property "answered" and the last question where
+      we have the "max_score" and/or "outcome"
 
-    First question: when there's a match from the "answered" with the answer.id the object is returned,
-    that then is used on the next if statement block to set the questionId and get the next question.
+      First question: when there's a match from the "answered" with the answer.id the object is returned,
+      that then is used on the next if statement block to set the questionId and get the next question.
 
-    Last question: when there's the property "max_score", then if the current score is less than or equal to the
-    "max_score" we return that item, that then is used on the next block to update the outcome state.
+      Last question: when there's the property "max_score", then if the current score is less than or equal to the
+      "max_score" we return that item, that then is used on the next block to update the outcome state.
     */
 
     const nextOption = nextOptions?.find((option: any) => {
