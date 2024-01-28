@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { Outcome, Questionnaire } from "../lib/interfaces";
 import ProgressBar from "./ProgressBar";
 import OutcomeComponent from "./OutcomeComponent";
-import StyledButton from "../styles/StyledButton";
+import Button from "./ui/Button";
 
 interface Props {
   formData: Questionnaire;
@@ -162,22 +162,25 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
                   {question?.answers.map((answer) => {
                     const isAnswerSelected = answerSelected === answer.id;
                     return (
-                      <button
-                        className={isAnswerSelected ? "selected" : ""}
+                      <Button
                         key={answer.id}
+                        variant={"secondary"}
+                        label={answer.label}
+                        className={isAnswerSelected ? "selected" : ""}
                         onClick={() => selectAnswer(answer)}
-                      >
-                        {answer.label}
-                      </button>
+                      />
                     );
                   })}
                 </div>
               </div>
             </CardBody>
             <CardFooter>
-              <StyledButton disabled={!answer} onClick={nextQuestion}>
-                Next
-              </StyledButton>
+              <Button
+                variant={"primary"}
+                label="Next"
+                disabled={!answer}
+                onClick={nextQuestion}
+              />
             </CardFooter>
           </>
         )}
@@ -267,37 +270,6 @@ const CardBody = styled.div`
       display: flex;
       flex-direction: row;
       justify-content: space-between;
-
-      button {
-        width: 135px;
-        padding: 16px;
-        background-color: transparent;
-        border: 2px solid #e3e1e1;
-        border-radius: 40px;
-        font-family: "Montserrat", sans-serif;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #75d0be;
-        cursor: pointer;
-
-        &.selected {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          background-color: #75d0be;
-          color: #fff;
-          border: none;
-          transition: all 0.3s ease-in-out;
-
-          &:after {
-            content: "";
-            display: inline-flex;
-            background: url("./assets/icon-check.svg") no-repeat right;
-            width: 24px;
-            height: 24px;
-          }
-        }
-      }
     }
   }
 `;

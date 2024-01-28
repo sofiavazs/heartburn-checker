@@ -1,6 +1,7 @@
 import React from "react";
+
 import { Outcome } from "../lib/interfaces";
-import StyledButton from "../styles/StyledButton";
+import Button from "./ui/Button";
 
 interface Props {
   outcome: Outcome;
@@ -13,7 +14,7 @@ const OutcomeComponent: React.FC<Props> = ({ outcome }) => {
       <h3>{outcome?.text}</h3>
       <div>
         {outcome.show_booking_button && (
-          <StyledButton>Book an appointment</StyledButton>
+          <Button variant={"primary"} label={"Book an appointment"} />
         )}
       </div>
     </>
