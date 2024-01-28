@@ -83,7 +83,7 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
     const nextOptions = question?.next;
 
     /*
-      Finds the next question, there's two instances where the next array in the question object
+      Finds the next question, there's two instances where the "next" array in the question object
       is different: the first question which has the property "answered" and the last question where
       we have the "max_score" and/or "outcome"
 
@@ -119,18 +119,17 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
 
   const previousQuestion = () => {
     const previousQuestionId = formData.questions[currentQuestionIndex - 1].id;
-    const previousAnswer = patientAnswers[previousQuestionId];
     const answers = formData.questions.flatMap((answer) => answer.answers);
     const previousAnswerMatch = answers.find(
-      (answer) => answer.id === previousAnswer
+      (answer) => answer.id === patientAnswers[previousQuestionId]
     );
-    const currentAnswerScore = previousAnswerMatch?.score!;
 
     if (previousAnswerMatch) {
+      const currentAnswerScore = previousAnswerMatch.score;
       setAnswerSelected(previousAnswerMatch.id);
+      setPatientScore(patientScore - currentAnswerScore);
     }
     setQuestionId(previousQuestionId);
-    setPatientScore(patientScore - currentAnswerScore);
     setProgress(progress - progressIncrement);
   };
 
