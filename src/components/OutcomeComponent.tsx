@@ -12,11 +12,9 @@ const OutcomeComponent: React.FC<Props> = ({ outcome }) => {
     <>
       <h2>Thank you for answering all the questions</h2>
       <h3>{outcome?.text}</h3>
-      <div>
-        {outcome.show_booking_button && (
-          <Button variant={"primary"} label={"Book an appointment"} />
-        )}
-      </div>
+      {outcome.show_booking_button && (
+        <Button variant={"primary"} label={"Book an appointment"} />
+      )}
     </>
   );
 };
