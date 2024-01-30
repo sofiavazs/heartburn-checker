@@ -202,7 +202,7 @@ const PageWrapper = styled.div`
 const StyledCard = styled.div`
   display: flex;
   max-width: 25rem;
-  height: 80vh;
+  height: 70vh;
   margin: 1rem;
   flex-direction: column;
   background: #fff;
