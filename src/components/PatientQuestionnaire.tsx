@@ -86,16 +86,12 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
       Finds the next question, there's two instances where the "next" array in the question object
       is different: the first question which has the property "answered" and the last question where
       we have the "max_score" and/or "outcome"
-
-      First question: when there's a match from the "answered" with the answer.id the object is returned,
-      that then is used on the next if statement block to set the questionId and get the next question.
-
-      Last question: when there's the property "max_score", then if the current score is less than or equal to the
-      "max_score" we return that item, that then is used on the next block to update the outcome state.
+      In order to cover those case scenarios, those are checked so the next question can be displayed
     */
 
     const nextOption = nextOptions?.find((option: any) => {
       if (option.answered) {
+        console.log(option.answered === answer?.id);
         return option.answered === answer?.id;
       } else if (option.max_score) {
         return currentScore <= option.max_score;
