@@ -91,7 +91,6 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
 
     const nextOption = nextOptions?.find((option: any) => {
       if (option.answered) {
-        console.log(option.answered === answer?.id);
         return option.answered === answer?.id;
       } else if (option.max_score) {
         return currentScore <= option.max_score;
