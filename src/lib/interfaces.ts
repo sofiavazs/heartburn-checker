@@ -13,7 +13,7 @@ export interface Question {
 export interface Answers {
   id: string;
   label: string;
-  score: string;
+  score: number;
 }
 
 interface NextQuestion {

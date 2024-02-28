@@ -19,6 +19,7 @@ const BarContainer = styled.div`
   height: 2px;
   background-color: #e3e1e1;
 `;
+
 const Bar = styled.span<{ fill: number }>`
   width: ${(props) => (props.fill < 100 ? props.fill + "%" : "100%")};
   height: 2px;

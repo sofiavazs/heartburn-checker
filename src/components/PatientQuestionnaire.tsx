@@ -4,48 +4,95 @@ import styled from "styled-components";
 import { Outcome, Questionnaire } from "../lib/interfaces";
 import ProgressBar from "./ProgressBar";
 import OutcomeComponent from "./OutcomeComponent";
-import StyledButton from "../styles/StyledButton";
+import Button from "./ui/Button";
 
 interface Props {
   formData: Questionnaire;
 }
 
 const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
-  const totalNumberQuestions = formData && formData.questions.length;
-  const progressIncrement = 100 / totalNumberQuestions;
+  const [patientScore, setPatientScore] = useState<number>(0);
   const [questionId, setQuestionId] = useState<string>(
     formData.questions[0].id
   );
-  const [patientScore, setPatientScore] = useState<number>(0);
-  const [patientAnswers, setPatientAnswers] = useState<any>([]);
+  const currentQuestionIndex = formData.questions.findIndex(
+    (current) => current.id === questionId
+  );
+  const [patientAnswers, setPatientAnswers] = useState<{
+    [key: string]: string;
+  }>({});
   const [outcome, setOutcome] = useState<Outcome>();
+  const [answerSelected, setAnswerSelected] = useState<string>("");
+
+  /*
+    Progress bar value logic:
+    If the patient answers yes to the first question there's an extra question
+    that they will answer which gets skipped if the patient answers no. Since
+    the length will vary based on that, then the totalNumberQuestions will need to reflect that,
+    so a ternary operator performs that check and returns the length accordingly.
+
+    The reason why is length + 1 in the first condition is because I want the progress bar
+    to be completed only when the outcome screen is shown.
+    However, this is not a scalable solution, as it only applies to this specific .json, ideally
+    for example, each question could have an associated progress property to cover further branching.
+  */
+  const totalNumberQuestions =
+    currentQuestionIndex >= 1 && patientScore >= 5
+      ? formData.questions.length + 1
+      : formData.questions.length;
+  const progressIncrement = 100 / totalNumberQuestions;
   const [progress, setProgress] = useState<number>(progressIncrement);
 
+  /*
+    Stores the question when there's a match with the questionId state
+    which is initialised with the first question
+  */
   const question = formData?.questions.find(
     (question) => question.id === questionId
   );
+
+  /*
+    Stores when there's a match between the answer id
+    and the item from the patientAnswers state accessed with the questionId
+  */
   const answer =
     patientAnswers &&
     question?.answers.find(
       (answer) => answer.id === patientAnswers[questionId]
     );
 
+  /*
+    Allows to add new answers to the patient answers state
+    Everytime it's invoked on the answer buttons the answer object is sent in
+    and the patientAnswers state is updated by keep adding new items with
+    the questionId as a key and the answer.id as the value.
+  */
   const selectAnswer = (answer: any) => {
     setPatientAnswers((prev: any) => ({
       ...prev,
       [questionId]: answer.id,
     }));
+    setAnswerSelected(answer?.id);
   };
 
   const nextQuestion = () => {
-    const currentScore = patientScore + answer.score;
+    const currentScore = patientScore + answer!.score;
     setPatientScore(currentScore);
 
+    // gets the next question
     const nextOptions = question?.next;
+
+    /*
+      Finds the next question, there's two instances where the "next" array in the question object
+      is different: the first question which has the property "answered" and the last question where
+      we have the "max_score" and/or "outcome"
+      In order to cover those case scenarios, those are checked so the next question can be displayed
+    */
+
     const nextOption = nextOptions?.find((option: any) => {
       if (option.answered) {
-        return option.answered === answer.id;
-      } else if (typeof option.max_score === "number") {
+        return option.answered === answer?.id;
+      } else if (option.max_score) {
         return currentScore <= option.max_score;
       } else {
         return true;
@@ -66,14 +113,18 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
   };
 
   const previousQuestion = () => {
-    const currentQuestionIndex = formData.questions.findIndex(
-      (current) => current.id === questionId
+    const previousQuestionId = formData.questions[currentQuestionIndex - 1].id;
+    const answers = formData.questions.flatMap((answer) => answer.answers);
+    const previousAnswerMatch = answers.find(
+      (answer) => answer.id === patientAnswers[previousQuestionId]
     );
-    if (currentQuestionIndex > 0) {
-      const previousQuestionId =
-        formData.questions[currentQuestionIndex - 1].id;
-      setQuestionId(previousQuestionId);
+
+    if (previousAnswerMatch) {
+      const currentAnswerScore = previousAnswerMatch.score;
+      setAnswerSelected(previousAnswerMatch.id);
+      setPatientScore(patientScore - currentAnswerScore);
     }
+    setQuestionId(previousQuestionId);
     setProgress(progress - progressIncrement);
   };
 
@@ -81,7 +132,7 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
     <PageWrapper>
       <StyledCard>
         <CardHeader>
-          {patientScore > 0 && !outcome && (
+          {currentQuestionIndex > 0 && !outcome && (
             <button className="previous" onClick={previousQuestion} />
           )}
           <h1>Heartburn Checker</h1>
@@ -103,21 +154,28 @@ const PatientQuestionnaire: React.FC<Props> = ({ formData }) => {
               <span className="underline" />
               <div>
                 <div className="answer-buttons-container">
-                  {question?.answers.map((answer) => (
-                    <button
-                      key={answer.id}
-                      onClick={() => selectAnswer(answer)}
-                    >
-                      {answer.label}
-                    </button>
-                  ))}
+                  {question?.answers.map((answer) => {
+                    const isAnswerSelected = answerSelected === answer.id;
+                    return (
+                      <Button
+                        key={answer.id}
+                        variant={"secondary"}
+                        label={answer.label}
+                        className={isAnswerSelected ? "selected" : ""}
+                        onClick={() => selectAnswer(answer)}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </CardBody>
             <CardFooter>
-              <StyledButton disabled={!answer} onClick={nextQuestion}>
-                Next
-              </StyledButton>
+              <Button
+                variant={"primary"}
+                label="Next"
+                disabled={!answer}
+                onClick={nextQuestion}
+              />
             </CardFooter>
           </>
         )}
@@ -139,7 +197,7 @@ const PageWrapper = styled.div`
 const StyledCard = styled.div`
   display: flex;
   max-width: 25rem;
-  height: 80vh;
+  height: 70vh;
   margin: 1rem;
   flex-direction: column;
   background: #fff;
@@ -207,37 +265,6 @@ const CardBody = styled.div`
       display: flex;
       flex-direction: row;
       justify-content: space-between;
-
-      button {
-        width: 135px;
-        padding: 16px;
-        background-color: transparent;
-        border: 2px solid #e3e1e1;
-        border-radius: 40px;
-        font-family: "Montserrat", sans-serif;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #75d0be;
-        cursor: pointer;
-
-        &:focus {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          background-color: #75d0be;
-          color: #fff;
-          border: none;
-          transition: all 0.3s ease-in-out;
-
-          &:after {
-            content: "";
-            display: inline-flex;
-            background: url("./assets/icon-check.svg") no-repeat right;
-            width: 24px;
-            height: 24px;
-          }
-        }
-      }
     }
   }
 `;
